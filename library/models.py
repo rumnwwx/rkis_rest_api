@@ -27,16 +27,3 @@ class Book(models.Model):
 
     def __str__(self):
         return f"{self.title} by {self.author}"
-
-
-class Textbook(Book):
-    edition = models.PositiveIntegerField()
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["title", "author", "year_of_publication", "edition"],
-                                    name="unique_textbook")
-        ]
-
-    def __str__(self):
-        return f"{self.title} (Edition {self.edition}) by {self.author}"
