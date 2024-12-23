@@ -1,38 +1,39 @@
-from rest_framework import generics
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
+from rest_framework.filters import SearchFilter
 from .models import Book, Author
 from .serializers import BookSerializer, AuthorSerializer
+from rest_framework.permissions import IsAdminUser
 
 
-class BookListView(generics.ListAPIView):
+class BookListCreateAPIView(ListCreateAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'genre']
 
-    def get_queryset(self):
-        queryset = Book.objects.all()
-        title = self.request.query_params.get('title', None)
-        genre = self.request.query_params.get('genre', None)
-        author_name = self.request.query_params.get('author', None)
+    permission_classes = [IsAdminUser]
 
-        if title:
-            queryset = queryset.filter(title__icontains=title)
-        if genre:
-            queryset = queryset.filter(genre__icontains=genre)
-        if author_name:
-            queryset = queryset.filter(author__first_name__icontains=author_name) | queryset.filter(author__last_name__icontains=author_name)
-
-        return queryset
+    def perform_create(self, serializer):
+        serializer.save()
 
 
-class BookDetailView(generics.RetrieveAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-
-
-class AuthorListView(generics.ListAPIView):
+class AuthorListCreateAPIView(ListCreateAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        serializer.save()
 
 
-class AuthorDetailView(generics.RetrieveAPIView):
+class BookDetailView(RetrieveAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+
+
+class AuthorDetailView(RetrieveAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
